@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Test</title>
+  <script src="{{ url_for('static', filename='sql-wasm.js') }}"></script>
+  <script src="{{ url_for('static', filename='sql.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/sql/sql.min.js"></script>
+  <style>
+    /* Center the CodeMirror editor on the screen */
+    .CodeMirror {
+      width: 50%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Experimenta con la base de datos Sakila</h1>
+  <p style="text-align: center;">introduce tu consulta</p>
+  
+
+  <textarea id="sql-input"></textarea>
+  <button onclick="executeSql()" style="position: absolute; top: 390px; right: 260px;">Execute</button>
+  <button onclick="executeSql()" style="position: absolute; top: 340px; right: 260px;">Solucion</button>
+  <div id="sql-results"></div>
+  <script>
+    var sqlEditor = CodeMirror.fromTextArea(document.getElementById("sql-input"), {
+      mode: "text/x-sql",
+      theme: "dracula",
+      lineNumbers: true
+    });
+
+    function executeSql() {
+      var sqlInput = sqlEditor.getValue();
+      initSqlJs().then(function(SQL) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "{{ url_for('static', filename='sakila.sqlite') }}", true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(e) {
+          var uInt8Array = new Uint8Array(this.response);
+          var db = new SQL.Database(uInt8Array);
+          var result = db.exec(sqlInput);
+          var output = "";
+          for (var i = 0; i < result[0].values.length; i++) {
+            output += result[0].values[i] + "<br>";
+          }
+          document.getElementById("sql-results").innerHTML = output;
+        };
+        xhr.send();
+      });
+    }
+  </script>
+</body>
+</html>

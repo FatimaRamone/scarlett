@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Test</title>
+  <script src="{{ url_for('static', filename='sql-wasm.js') }}"></script>
+  <script src="{{ url_for('static', filename='sql.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/sql/sql.min.js"></script>
+  <style>
+    /* Center the CodeMirror editor on the screen */
+    .CodeMirror {
+      width: 50%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Experimenta con la base de datos Sakila</h1>
+  <p style="text-align: center;" id="question"></p>
+
+  <textarea id="sql-input"></textarea>
+  <button onclick="executeSql()">Execute</button>
+  <button onclick="showSolution()">Solución</button>
+  <div id="sql-results"></div>
+  
+  <script>
+    var sqlEditor = CodeMirror.fromTextArea(document.getElementById("sql-input"), {
+      mode: "text/x-sql",
+      theme: "dracula",
+      lineNumbers: true
+    });
+    
+    var exercises = [
+      {
+        question: "Actores que teñen de apelido “Lollobrigida”",
+        solution: "SELECT * FROM actor WHERE last_name='LOLLOBRIGIDA';"  
+      },
+      {
+        question: "Actores cuyo nombre por lo menos contenga una ‘o’",
+        solution: "SELECT first_name FROM actor WHERE first_name LIKE '%o%';"
+      },
+      // Add more exercises here as needed
+    ];
+    
+    var currentExercise = 0;
+    document.getElementById("question").textContent = exercises[currentExercise].question;
+    sqlEditor.setValue("");
+    
+    function executeSql() {
+      var sqlInput = sqlEditor.getValue();
+      initSqlJs().then(function(SQL) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "{{ url_for('static', filename='sakila.sqlite') }}", true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(e) {
+          var uInt8Array = new Uint8Array(this.response);
+          var db = new SQL.Database(uInt8Array);
+          var result = db.exec(sqlInput);
+          var output = "";
+          for (var i = 0; i < result[0].values.length; i++) {
+            output += result[0].values[i] + "<br>";
+          }
+          document.getElementById("sql-results").innerHTML = output;
+        };
+        xhr.send();
+      });
+    }
+    
+    function showSolution() {
+      sqlEditor.setValue(exercises[currentExercise].solution);
+    }
+  </script>
+  
+</body>
+</html>

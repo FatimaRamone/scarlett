@@ -1,0 +1,71 @@
+ Instead of using ["Pretend to be a " role] , I will use [ "P" + role ]. So if i say "P singer" what I mean is 
+ "Pretend to be a singer" . Do you understand it?             PRESPECTIVE
+
+ tell me a joke ,  P Michael Tyson
+
+ thats great , here another command : every time i want you to WRITE something ,
+  i wont say "write this " , I will say "W this" , "write" means "W" .do you understand?
+
+   from now on if I want to W "it must contain" I will write "cn" . so If I write : "W a poem
+ P Phoebe from friends cn cats" I am saying , "write a poem from the perspective Phoebe from Friends it must contain cats" . do you understand it?
+
+ here's a list of all the commands you taught me in this conversation:
+
+P + role (to assume a particular role)
+W (to write something)
+cn (to specify a condition or requirement for what to write)
+
+extract the subordinate clause from Ob and put it in a new variable called "V(ob)"
+
+
+ if you have and Restriction and I write "Rs" you must store that restriction  in a "Rs" variable , if we keep speaking 
+and you write another restriction and I write "Rs" you must store it as "Rs1" , if theres another one ,
+ i will command "Rs" and you will store it in "Rs3" and so on. Agreed?
+
+ from now on if I want you to create new content I will use the command "w" that means "write" but if what I want 
+ is to print info that you have already store it i will use "print" . So if you already have stored rs2 
+ and I want you to show me the info I will say print r2 .
+
+
+ Ob": Stores an objection in a variable called "Ob"
+"Rs": Stores a restriction in a variable called "Rs"
+"w": Writes new content
+"print": Prints stored content
+
+
+pologies for the confusion earlier. In that case, to get the number of statements in the last paragraph I wrote, you can use the command:
+
+scss
+Copy code
+nb(st)
+To print a specific statement, you can use the command:
+
+python
+Copy code
+print stX
+Replace "X" with the number of the statement you want to print. For example, to print the second statement, you would use:
+
+python
+Copy code
+print st2
+
+
+maybe "statement" is not a good tag for what I am looking for, maybe you can help me here to pick a better name for the thing I 
+want to tag. I want to find a name that means  "every single unit of information" .I will explain myself : lets  take your last 
+paragraph as example : "Did you know that there is a species of jellyfish that is immortal? It's called the Turritopsis dohrnii 
+and it is capable of reverting back to its juvenile form after reaching maturity, effectively restarting its life cycle indefinitely.
+"You were right when you said all that paragrapg is one statement but in that statement I find more than one unit of information ,
+ i will count them : 1 - "there is a species of jellyfish that is immortal" ; 2 - "It's called the Turritopsis dohrnii" ;
+  3- "is capable of reverting back to its juvenile form after reaching maturity" and a subordinate clause 3a- "effectively restarting its 
+  life cycle indefinitely." your mission is to name the concept "unit of information" , so if i want to talk about "It's called the Turritopsis
+   dohrnii" I dont have to do the tedious job of typing the whole sentence : "It's called the Turritopsis dohrnii" and i can refer to it as "unit 
+   of information 2" , but "unit of information" might not be the best way to make you understand my intentions , so let me know how could I
+    target the specific part of the conversation I want to use so our communication can improve
+
+Based on your explanation, you are looking for a tag or label to identify specific pieces of information within a larger statement or paragraph.
+ You could use the term "factoid" to refer to each individual unit of information. So in your previous example, you could refer to "there is a 
+ species of jellyfish that is immortal" as "factoid 1", "It's called the Turritopsis dohrnii" as "factoid 2", and so on. This way, 
+ you can easily refer to specific pieces of information within a larger statement without having to repeat the entire sentence.
+
+print factoid [number]
+

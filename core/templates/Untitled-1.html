@@ -1,0 +1,140 @@
+Right now the "siguiente ejercicio" botton pops when the right solution is displayed on the editor with the "dame una pista" botton , thats a problem .What I want is :
+ the "siguiente ejercicio" botton pops up right after  the right solution is
+ executed with the bottom "Ejecuta el comando"
+
+ still not working , actually if I enter the right solution by hand and i execute it , the "siguiente ejercicio" botton doesnt show up . this is a problem . 
+ The "siguiente ejercicio" button should show up when the right solution is executed but right now it only shows when i display the solution on the editor with the "dame una pista" botton 
+
+
+ <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Test</title>
+  <script src="{{ url_for('static', filename='sql-wasm.js') }}"></script>
+  <script src="{{ url_for('static', filename='sql.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/sql/sql.min.js"></script>
+  <style>
+    /* Center the CodeMirror editor on the screen */
+    .CodeMirror {
+      width: 50%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Experimenta con la base de datos Sakila</h1>
+  <h2 style="text-align: center;" id="question"></h2>
+
+  <textarea id="sql-input"></textarea>
+  <button onclick="executeSql()">Ejecuta el comando</button>
+  <button onclick="showSolution()">Dame una pista</button>
+  <p>  </p>
+  <button id="next-exercise-btn" onclick="nextExercise()" style="display:none;">Siguiente Ejercicio</button>
+  <div id="sql-results"></div>
+  
+
+  <script>
+    var sqlEditor = CodeMirror.fromTextArea(document.getElementById("sql-input"), {
+      mode: "text/x-sql",
+      theme: "dracula",
+      lineNumbers: true
+    });
+    
+    var exercises = [
+      {
+        question: "Actores que teñen de apelido “Lollobrigida”",
+        solution: "SELECT * FROM actor WHERE last_name='LOLLOBRIGIDA';"
+      },
+      {
+        question: "Actores cuyo nombre por lo menos contenga una ‘O’",
+        solution: "SELECT first_name FROM actor WHERE first_name LIKE '%O%';"
+        
+      },
+  
+      // Add more exercises here as needed
+    ];
+    </script>
+    <script>
+    var currentExercise = 0;
+    document.getElementById("question").textContent = exercises[currentExercise].question;
+    sqlEditor.setValue("");
+    
+    function executeSql() {
+  var sqlInput = sqlEditor.getValue();
+  initSqlJs().then(function(SQL) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "{{ url_for('static', filename='sakila.sqlite') }}", true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = function(e) {
+      var uInt8Array = new Uint8Array(this.response);
+      var db = new SQL.Database(uInt8Array);
+      var result = db.exec(sqlInput);
+      var output = "<table style='border-collapse: collapse;'>";
+      // Generate table headers
+      output += "<tr style='border: 1px solid black; background-color: #ddd;'>";
+      for (var i = 0; i < result[0].columns.length; i++) {
+        output += "<th style='border: 1px solid black; padding: 5px; text-align: left;'>" + result[0].columns[i] + "</th>";
+      }
+      output += "</tr>";
+      // Generate table rows
+      for (var i = 0; i < result[0].values.length; i++) {
+        output += "<tr style='border: 1px solid black;'>";
+        for (var j = 0; j < result[0].values[i].length; j++) {
+          output += "<td style='border: 1px solid black; padding: 5px;'>" + result[0].values[i][j] + "</td>";
+        }
+        output += "</tr>";
+      }
+      output += "</table>";
+      document.getElementById("sql-results").innerHTML = output;
+      if (sqlInput == exercises[currentExercise].solution) {
+        document.getElementById("next-exercise-btn").style.display = "block";
+      }
+    };
+    xhr.send();
+  });
+}
+
+
+
+
+    
+    function nextExercise() {
+  currentExercise += 1;
+  if (currentExercise < exercises.length) {
+    document.getElementById("question").textContent = exercises[currentExercise].question;
+    sqlEditor.setValue("");
+    document.getElementById("next-exercise-btn").style.display = "none";
+  } else {
+    alert("No hay más ejercicios disponibles.");
+  }
+}
+
+
+
+
+
+
+
+    var currentWordCount = 0;
+function showSolution() {
+  var solutionWords = exercises[currentExercise].solution.split(" ");
+  currentWordCount += 1;
+  var partialSolution = solutionWords.slice(0, currentWordCount).join(" ");
+  sqlEditor.setValue(partialSolution);
+  if (currentWordCount === solutionWords.length) {
+    document.getElementById("next-exercise-btn").style.display = "block";
+  }
+}
+
+
+  </script>
+  
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Test</title>
+  <script src="{{ url_for('static', filename='sql-wasm.js') }}"></script>
+  <script src="{{ url_for('static', filename='sql.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/sql/sql.min.js"></script>
+  <style>
+    /* Center the CodeMirror editor on the screen */
+    .CodeMirror {
+      width: 50%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Experimenta con la base de datos Sakila</h1>
+  <h2 style="text-align: center;" id="question"></h2>
+
+  <textarea id="sql-input"></textarea>
+  <button onclick="executeSql()">Ejecuta el comando</button>
+  <button onclick="showSolution()">Dame una pista</button>
+  <p>  </p>
+  <button id="next-exercise-btn" onclick="nextExercise()" style="display:none;">Siguiente Ejercicio</button>
+  <div id="sql-results"></div>
+  
+
+  <script>
+    var sqlEditor = CodeMirror.fromTextArea(document.getElementById("sql-input"), {
+      mode: "text/x-sql",
+      theme: "dracula",
+      lineWrapping: true,
+      lineNumbers: true
+    });
+    
+    var exercises = [
+      {
+        question: "Actores que teñen de apelido “Lollobrigida”",
+        solution: "SELECT * FROM actor WHERE last_name='LOLLOBRIGIDA';"
+      },
+      {
+        question: "Actores cuyo nombre por lo menos contenga una ‘O’",
+        solution: "SELECT first_name FROM actor WHERE first_name LIKE '%O%';"
+        
+
+
+
+      },
+      {
+question: "Actores cuyo nombre contengan por lo menos unha ‘O’ en su nombre y una ‘A’ en su apelido.",
+solution: "SELECT first_name ,last_name FROM actor WHERE first_name LIKE '%O%'AND last_name LIKE '%A%';"
+},
+{
+question: "Ciudades que comienzan por 'A'",
+solution: "SELECT city FROM city WHERE city LIKE 'A%';"
+},
+{
+question: "Cidades que rematan en 'S'",
+solution: "SELECT city FROM city WHERE city LIKE '%S';"
+},
+{
+question: "Cidades que pertencen a Méjico.",
+solution: "SELECT city.city, country.country FROM city INNER JOIN country ON city.country_id=country.country_id WHERE country='MEXICO';"
+},
+{
+question: "Clientes que residen en la ciudad de Bratislava.",
+solution: "SELECT customer.first_name, customer.last_name FROM customer INNER JOIN address ON customer.address_id=address.address_id INNER JOIN city ON address.city_id=city.city_id WHERE city='BRATISLAVA';"
+},
+{
+question: "Actores que tengan una x en el nombre o en el apellido",
+solution: "SELECT * FROM actor WHERE first_name LIKE '%X%' OR last_name LIKE '%X%';"
+},
+      // Add more exercises here as needed
+    ];
+    </script>
+    <script>
+    var currentExercise = 0;
+    document.getElementById("question").textContent = exercises[currentExercise].question;
+    sqlEditor.setValue("");
+    
+    function executeSql() {
+  var sqlInput = sqlEditor.getValue();
+  initSqlJs().then(function(SQL) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "{{ url_for('static', filename='sakila.sqlite') }}", true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = function(e) {
+      var uInt8Array = new Uint8Array(this.response);
+      var db = new SQL.Database(uInt8Array);
+      var result = db.exec(sqlInput);
+      var output = "<table style='border-collapse: collapse;'>";
+      // Generate table headers
+      output += "<tr style='border: 1px solid black; background-color: #ddd;'>";
+      for (var i = 0; i < result[0].columns.length; i++) {
+        output += "<th style='border: 1px solid black; padding: 5px; text-align: left;'>" + result[0].columns[i] + "</th>";
+      }
+      output += "</tr>";
+      // Generate table rows
+      for (var i = 0; i < result[0].values.length; i++) {
+        output += "<tr style='border: 1px solid black;'>";
+        for (var j = 0; j < result[0].values[i].length; j++) {
+          output += "<td style='border: 1px solid black; padding: 5px;'>" + result[0].values[i][j] + "</td>";
+        }
+        output += "</tr>";
+      }
+      output += "</table>";
+      document.getElementById("sql-results").innerHTML = output;
+      // Check if entered query matches solution
+      if (sqlInput.trim().toUpperCase() === exercises[currentExercise].solution.trim().toUpperCase()) {
+        document.getElementById("next-exercise-btn").style.display = "block";
+      }
+    };
+    xhr.send();
+  });
+}
+
+
+
+
+
+
+
+    
+    function nextExercise() {
+  currentExercise += 1;
+  if (currentExercise < exercises.length) {
+    document.getElementById("question").textContent = exercises[currentExercise].question;
+    sqlEditor.setValue("");
+    document.getElementById("next-exercise-btn").style.display = "none";
+  } else {
+    alert("No hay más ejercicios disponibles.");
+  }
+}
+
+
+
+
+
+
+
+    var currentWordCount = 0;
+function showSolution() {
+  var solutionWords = exercises[currentExercise].solution.split(" ");
+  currentWordCount += 1;
+  var partialSolution = solutionWords.slice(0, currentWordCount).join(" ");
+  sqlEditor.setValue(partialSolution);
+  if (currentWordCount === solutionWords.length) {
+    document.getElementById("next-exercise-btn").style.display = "block";
+  }
+}
+
+
+  </script>
+  
+</body>
+
+</html>

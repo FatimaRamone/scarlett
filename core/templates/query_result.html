@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Query Result</title>
+</head>
+<body>
+  {% if result %}
+    <table>
+      {% for row in result %}
+        <tr>
+          {% for value in row %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No results found.</p>
+  {% endif %}
+</body>
+</html>
